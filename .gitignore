@@ -27,3 +27,4 @@ score
 
 # do not include csv in Git
 csv
+snake_ssh_key.pem
