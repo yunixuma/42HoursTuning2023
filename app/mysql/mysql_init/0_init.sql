@@ -41,7 +41,7 @@ CREATE TABLE `department_role_member` (
     `user_id` VARCHAR(36) NOT NULL,
     `entry_date` DATE NOT NULL,
     `belong` TINYINT(1) NOT NULL DEFAULT '1',
-    PRIMARY KEY (`department_id`, `role_id`, `user_id`, `entry_date`)
+    PRIMARY KEY (`user_id`, `department_id`, `role_id`, `entry_date`)
 );
 
 CREATE TABLE `office` (
@@ -82,5 +82,5 @@ CREATE TABLE `match_group` (
 CREATE TABLE `match_group_member` (
     `match_group_id` VARCHAR(36) NOT NULL,
     `user_id` VARCHAR(36) NOT NULL,
-    PRIMARY KEY (`match_group_id`, `user_id`)
+    PRIMARY KEY (`user_id`, `match_group_id`)
 );
