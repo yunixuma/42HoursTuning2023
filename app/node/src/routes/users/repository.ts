@@ -244,9 +244,16 @@ export const getUserForFilter = async (
 ): Promise<UserForFilter> => {
   let userRows: RowDataPacket[];
   if (!userId) {
-    [userRows] = await pool.query<RowDataPacket[]>(
-      "SELECT user_id, user_name, office_id, user_icon_id FROM user ORDER BY RAND() LIMIT 1"
-    );
+    let randomUserRow;
+    do {
+      const [recordCountRow] = await pool.query<RowDataPacket[]>("SELECT COUNT(*) as recordCount FROM user");
+      const recordCount = recordCountRow[0].recordCount;
+      const randomId = Math.floor(Math.random() * recordCount) + 1;
+
+      [randomUserRow] = await pool.query<RowDataPacket[]>("SELECT user_id, user_name, office_id, user_icon_id FROM user WHERE id = ?", [randomId]);
+    } while (randomUserRow.length === 0);
+
+    userRows = randomUserRow;
   } else {
     [userRows] = await pool.query<RowDataPacket[]>(
       "SELECT user_id, user_name, office_id, user_icon_id FROM user WHERE user_id = ?",
