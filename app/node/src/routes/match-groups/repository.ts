@@ -59,10 +59,11 @@ export const getMatchGroupDetailByMatchGroupId = async (
   status?: string
 ): Promise<MatchGroupDetail | undefined> => {
   let query =
-    "SELECT match_group_id, match_group_name, description, status, created_by, created_at FROM match_group WHERE match_group_id = ? ORDER BY status DESC, created_at DESC, match_group_name ASC";
+    "SELECT match_group_id, match_group_name, description, status, created_by, created_at FROM match_group WHERE match_group_id = ?";
   if (status === "open") {
     query += " AND status = 'open'";
   }
+  query += " ORDER BY status DESC, created_at DESC, match_group_name ASC "
   const [matchGroup] = await pool.query<RowDataPacket[]>(query, [matchGroupId]);
   if (matchGroup.length === 0) {
     return;
