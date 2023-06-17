@@ -63,7 +63,7 @@ export const getMatchGroupDetailByMatchGroupId = async (
   if (status === "open") {
     query += " AND status = 'open'";
   }
-  query += " ORDER BY status DESC, created_at DESC, match_group_name ASC "
+
   const [matchGroup] = await pool.query<RowDataPacket[]>(query, [matchGroupId]);
   if (matchGroup.length === 0) {
     return;

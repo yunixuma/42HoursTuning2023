@@ -257,6 +257,17 @@ matchGroupRouter.get(
         return;
       }
 
+      // ステータスの降順 (openが先)・作成日の降順・マッチグループ名の昇順でソート
+      matchGroups.sort((a, b) => {
+        if (a.status === "open" && b.status === "close") return -1;
+        if (a.status === "close" && b.status === "open") return 1;
+        if (new Date(a.createdAt) > new Date(b.createdAt)) return -1;
+        if (new Date(a.createdAt) < new Date(b.createdAt)) return 1;
+        if (a.matchGroupName < b.matchGroupName) return -1;
+        if (a.matchGroupName > b.matchGroupName) return 1;
+        return 0;
+      });
+
       res.json(matchGroups.slice(offset, offset + limit));
       console.log("successfully found match groups");
     } catch (e) {
