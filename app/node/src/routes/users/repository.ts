@@ -246,7 +246,7 @@ export const getUserForFilter = async (
   if (!userId) {
     let randomUserRow;
     do {
-      const [recordCountRow] = await pool.query<RowDataPacket[]>("SELECT COUNT(*) as recordCount FROM user");
+      const [recordCountRow] = await pool.query<RowDataPacket[]>("SELECT COUNT(1) as recordCount FROM user");
       const recordCount = recordCountRow[0].recordCount;
       const randomId = Math.floor(Math.random() * recordCount) + 1;
 
