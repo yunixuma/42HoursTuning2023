@@ -59,7 +59,7 @@ export const getMatchGroupDetailByMatchGroupId = async (
   status?: string
 ): Promise<MatchGroupDetail | undefined> => {
   let query =
-    "SELECT match_group_id, match_group_name, description, status, created_by, created_at FROM match_group WHERE match_group_id = ?";
+    "SELECT match_group_id, match_group_name, description, status, created_by, created_at FROM match_group WHERE match_group_id = ? ORDER BY status DESC, created_at DESC, match_group_name ASC";
   if (status === "open") {
     query += " AND status = 'open'";
   }
