@@ -44,6 +44,8 @@ CREATE TABLE `department_role_member` (
     PRIMARY KEY (`user_id`, `department_id`, `role_id`, `entry_date`)
 );
 
+alter table department_role_member add index user_id_idx(user_id);
+
 CREATE TABLE `office` (
     `office_id` VARCHAR(36) NOT NULL,
     `office_name` VARCHAR(50) NOT NULL,
@@ -84,3 +86,5 @@ CREATE TABLE `match_group_member` (
     `user_id` VARCHAR(36) NOT NULL,
     PRIMARY KEY (`user_id`, `match_group_id`)
 );
+
+alter table match_group_member add index user_id_idx(user_id);
