@@ -12,6 +12,7 @@ CREATE TABLE `user` (
     `user_icon_id` VARCHAR(36) NOT NULL,
     `goal` VARCHAR(1024) NOT NULL,
     PRIMARY KEY (`user_id`)
+    INDEX mail_password (mail, password)
 );
 
 CREATE TABLE `session` (
@@ -19,6 +20,8 @@ CREATE TABLE `session` (
     `linked_user_id` VARCHAR(36) NOT NULL,
     `created_at` DATE NOT NULL,
     PRIMARY KEY (`session_id`)
+    INDEX linked_user_id_idx (linked_user_id)
+    INDEX session_id_idx (session_id)
 );
 
 CREATE TABLE `department` (
@@ -42,9 +45,8 @@ CREATE TABLE `department_role_member` (
     `entry_date` DATE NOT NULL,
     `belong` TINYINT(1) NOT NULL DEFAULT '1',
     PRIMARY KEY (`user_id`, `department_id`, `role_id`, `entry_date`)
+    INDEX user_id_idx (user_id)
 );
-
---alter table department_role_member add index user_id_idx(user_id);
 
 CREATE TABLE `office` (
     `office_id` VARCHAR(36) NOT NULL,
@@ -85,6 +87,5 @@ CREATE TABLE `match_group_member` (
     `match_group_id` VARCHAR(36) NOT NULL,
     `user_id` VARCHAR(36) NOT NULL,
     PRIMARY KEY (`user_id`, `match_group_id`)
+    INDEX user_id_idx (user_id)
 );
-
---alter table match_group_member add index user_id_idx(user_id);
