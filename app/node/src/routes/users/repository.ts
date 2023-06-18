@@ -310,11 +310,6 @@ export const getUserForFilter3 = async (
       return getUserForFilter2();
   }
 
-  if(matchGroupConfig.departmentFilter === "onlyMyDepartment") {
-
-      `SELECT user_id department_role_member WHERE drm.user_id = "${owner.userId}" AND drm.user_id = user.user_id AND belong = true `
-  }
-
   let query = "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
   (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, \
   (SELECT file_name FROM file WHERE file.file_id = user.user_icon_id) AS file_name, \
@@ -322,6 +317,7 @@ export const getUserForFilter3 = async (
   (SELECT skill_name FROM skill WHERE skill_id = (SELECT skill_id FROM skill_member sk WHERE sk.user_id = user.user_id LIMIT 1)) AS skill_names \
   FROM user ";
 
+  // 部署指定がある時
   if(matchGroupConfig.departmentFilter === "onlyMyDepartment") {
     query += 
       ` INNER JOIN department_role_member drm 
@@ -329,13 +325,17 @@ export const getUserForFilter3 = async (
         AND department_id = (SELECT department_id FROM department_role_member WHERE user_id = "${owner.userId}" AND belong = true) 
         AND drm.belong = true `
   }
+  // オフィス指定がある時
   if(matchGroupConfig.officeFilter === "onlyMyOffice") {
     query += 
       ` INNER JOIN office 
         ON user.office_id = office.office_id 
         AND office.office_id = (SELECT office_id FROM office WHERE office_name = "${owner.officeName}") `
   }
-  query += ` WHERE user.user_id LIKE "${Math.floor(Math.random() * 100)}%"`
+
+  const c1 = "0123456789abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 36)];
+  const c2 = "0123456789abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 36)];
+  query += ` WHERE user.user_id LIKE "${c1 + c2}%"`
   query += " LIMIT 100 ";
 
   console.log('------------------------0');
