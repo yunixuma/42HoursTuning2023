@@ -75,3 +75,17 @@ export const convertUsersForFilterToUsers = (
     return user;
   });
 };
+
+export const convertToUserForFilter2 = (rows: RowDataPacket[]): UserForFilter[] => {
+  return rows.map((row: RowDataPacket) => ({
+    userId: row.user_id,
+    userName: row.user_name,
+    userIcon: {
+      fileId: row.user_icon_id,
+      fileName: row.file_name,
+    },
+    officeName: row.office_name,
+    departmentName: row.department_name,
+    skillNames: row.skill_names,
+  }));
+};

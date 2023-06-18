@@ -12,3 +12,5 @@ ALTER TABLE department_role_member ADD INDEX department_id_idx (department_id);
 ALTER TABLE match_group_member ADD INDEX user_id_idx (user_id);
 
 ALTER TABLE skill ADD INDEX skill_name_idx (skill_name);
+
+ALTER TABLE skill_member ADD INDEX user_id_idx (user_id);
