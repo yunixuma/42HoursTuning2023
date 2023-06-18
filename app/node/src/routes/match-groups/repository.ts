@@ -17,12 +17,17 @@ export const hasSkillNameRecord = async (
 export const getUserIdsBeforeMatched = async (
   userId: string
 ): Promise<string[]> => {
-  const [userIdRows] = await pool.query<RowDataPacket[]>(
-    "SELECT m2.user_id " +
-    "FROM match_group_member m1 " +
-    "JOIN match_group_member m2 ON m1.match_group_id = m2.match_group_id " +
-    "WHERE m1.user_id = ?",
+  const [matchGroupIdRows] = await pool.query<RowDataPacket[]>(
+    "SELECT match_group_id FROM match_group_member WHERE user_id = ?",
     [userId]
+  );
+  if (matchGroupIdRows.length === 0) {
+    return [];
+  }
+
+  const [userIdRows] = await pool.query<RowDataPacket[]>(
+    "SELECT user_id FROM match_group_member WHERE match_group_id IN (?)",
+    [matchGroupIdRows]
   );
 
   return userIdRows.map((row) => row.user_id);
