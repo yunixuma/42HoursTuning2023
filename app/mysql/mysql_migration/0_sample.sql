@@ -13,13 +13,6 @@ ALTER TABLE department_role_member ADD INDEX department_id_idx (department_id);
 ALTER TABLE department_role_member ADD INDEX user_id_idx (user_id);
 ALTER TABLE department_role_member ADD INDEX role_id_idx (role_id);
 
-ALTER TABLE match_group ADD INDEX match_group_id_idx (match_group_id);
-ALTER TABLE match_group ADD INDEX match_group_name_idx (match_group_name);
-
-
-ALTER TABLE match_group_member ADD INDEX user_id_idx (user_id);
-ALTER TABLE match_group_member ADD INDEX match_group_id_idx (match_group_id);
-
 ALTER TABLE skill ADD INDEX skill_id_idx (skill_id);
 ALTER TABLE skill ADD INDEX skill_name_idx (skill_name);
 
