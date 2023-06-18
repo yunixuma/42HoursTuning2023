@@ -10,7 +10,7 @@ import {
   hasSkillNameRecord,
   insertMatchGroup,
 } from "./repository";
-import { getUserForFilter, getUserForFilter3 } from "../users/repository";
+import { getUserForFilter } from "../users/repository";
 
 export const checkSkillsRegistered = async (
   skillNames: string[]
@@ -37,11 +37,7 @@ export const createMatchGroup = async (
       console.error("not all members found before timeout");
       return;
     }
-    const candidates = await getUserForFilter3(matchGroupConfig, owner);
-
-    while (members.length < matchGroupConfig.numOfMembers && candidates.length > 0) {
-      let candidate = candidates[candidates.length - 1];
-      candidates.pop();
+    const candidate = await getUserForFilter();
     if (
       matchGroupConfig.departmentFilter !== "none" &&
       !isPassedDepartmentFilter(
@@ -82,7 +78,6 @@ export const createMatchGroup = async (
     }
     members = members.concat(candidate);
     console.log(`${candidate.userId} is added to members`);
-  }
   }
 
   const matchGroupId = uuidv4();

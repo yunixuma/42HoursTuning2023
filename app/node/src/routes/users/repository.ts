@@ -1,15 +1,11 @@
 import { RowDataPacket } from "mysql2";
 import pool from "../../util/mysql";
-import { SearchedUser, User, UserForFilter, 
-  MatchGroupConfig 
-} from "../../model/types";
+import { SearchedUser, User, UserForFilter } from "../../model/types";
 import {
   convertToSearchedUser,
   convertToUserForFilter,
-  convertToUserForFilter2,
   convertToUsers,
 } from "../../model/utils";
-//import { usersRouter } from "./controller";
 
 export const getUserIdByMailAndPassword = async (
   mail: string,
@@ -275,75 +271,3 @@ export const getUserForFilter = async (
 
   return convertToUserForFilter(user);
 };
-
-export const getUserForFilter2 = async (
-    ): Promise<UserForFilter[]> => {
-
-      let userRows: RowDataPacket[];
-
-      const [recordCountRow] = await pool.query<RowDataPacket[]>("SELECT COUNT(1) as recordCount FROM user");
-      const recordCount = recordCountRow[0].recordCount;
-      let randomIds: number[] = [];
-
-      for(let i = 0; i < 100; i++) {
-        randomIds.push(Math.floor(Math.random() * recordCount) + 1);
-      }
-      let query = "SELECT \
-      user_id, user_name, office_id, user_icon_id, \
-      (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, \
-      (SELECT file_name FROM file WHERE file.file_id = user.user_icon_id) AS file_name, \
-      (SELECT department_name FROM department WHERE department_id = (SELECT department_id FROM department_role_member drm WHERE drm.user_id = user.user_id AND belong = true)) AS department_name, \
-      (SELECT skill_name FROM skill WHERE skill_id = (SELECT skill_id FROM skill_member sk WHERE sk.user_id = user.user_id LIMIT 1)) AS skill_names \
-      FROM user WHERE id in (?)";
-      [userRows] = await pool.query<RowDataPacket[]>(query, [randomIds]);
-
-      return convertToUserForFilter2(userRows);
-    };
-
-export const getUserForFilter3 = async (
-    matchGroupConfig: MatchGroupConfig,
-    owner: UserForFilter
-  ): Promise<UserForFilter[]> => {
-    let userRows: RowDataPacket[];
-
-    if(matchGroupConfig.departmentFilter !== "onlyMyDepartment" && 
-      matchGroupConfig.officeFilter !== "onlyMyOffice") {
-        return getUserForFilter2();
-    }
-
-    if(matchGroupConfig.departmentFilter === "onlyMyDepartment") {
-
-        `SELECT user_id department_role_member WHERE drm.user_id = "${owner.userId}" AND drm.user_id = user.user_id AND belong = true `
-    }
-
-    let query = "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
-    (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, \
-    (SELECT file_name FROM file WHERE file.file_id = user.user_icon_id) AS file_name, \
-    (SELECT department_name FROM department WHERE department_id = (SELECT department_id FROM department_role_member drm WHERE drm.user_id = user.user_id AND belong = true)) AS department_name, \
-    (SELECT skill_name FROM skill WHERE skill_id = (SELECT skill_id FROM skill_member sk WHERE sk.user_id = user.user_id LIMIT 1)) AS skill_names \
-    FROM user ";
-
-    if(matchGroupConfig.departmentFilter === "onlyMyDepartment") {
-      query += 
-        ` INNER JOIN department_role_member drm 
-          ON drm.user_id = user.user_id 
-          AND department_id = (SELECT department_id FROM department_role_member WHERE user_id = "${owner.userId}" AND belong = true) 
-          AND drm.belong = true`
-    }
-    if(matchGroupConfig.officeFilter === "onlyMyOffice") {
-      query += 
-        ` INNER JOIN office 
-          ON user.office_id = office.office_id 
-          AND office.office_id = (SELECT office_id FROM office WHERE office_name = "${owner.officeName}") `
-    }
-    query += " ORDER BY RAND() LIMIT 100 ";
-
-    console.log('------------------------0');
-    console.log(query);
-
-    [userRows] = await pool.query<RowDataPacket[]>(
-      query
-    );
-    return convertToUserForFilter2(userRows);
-  };
-
