@@ -2,10 +2,13 @@ import express from "express";
 import { getUsers } from "./repository";
 import { getUserByUserId } from "./repository";
 import { getFileByFileId } from "../files/repository";
-import { SearchedUser, Target, User } from "../../model/types";
-import { getUsersByKeyword } from "./usecase";
+import {
+  //SearchedUser,
+  Target,
+  User,
+} from "../../model/types";
+import { getUsersByKeyword2 } from "./usecase";
 import fs from "fs";
-
 
 export const usersRouter = express.Router();
 
@@ -132,6 +135,7 @@ usersRouter.get(
       offset = 0;
     }
     try {
+      /*
       const duplicateUsers = await getUsersByKeyword(
         keyword,
         targets as Target[]
@@ -160,6 +164,11 @@ usersRouter.get(
           uniqueUsers = uniqueUsers.concat(user);
         }
       });
+    */
+      const uniqueUsers = await getUsersByKeyword2(
+        keyword,
+        targets as Target[]
+      );
 
       // User型に変換
       const users: User[] = uniqueUsers
