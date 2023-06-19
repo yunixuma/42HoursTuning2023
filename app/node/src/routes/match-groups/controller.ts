@@ -36,7 +36,7 @@ matchGroupRouter.post(
       if (!(await isReqBodyValueCorrect(reqBody, res))) {
         return;
       }
-      console.log("specified condition is valid");
+      //console.log("specified condition is valid");
 
       const matchGroupDetail = await createMatchGroup(reqBody);
       if (!matchGroupDetail) {
@@ -47,7 +47,7 @@ matchGroupRouter.post(
         return;
       }
       res.status(201).json(matchGroupDetail);
-      console.log("successfully created a new match group");
+      //console.log("successfully created a new match group");
     } catch (e) {
       next(e);
     }

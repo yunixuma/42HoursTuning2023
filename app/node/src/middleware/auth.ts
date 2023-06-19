@@ -25,7 +25,7 @@ export const checkAuthMiddleware = async (
       return;
     }
 
-    console.log("user has a valid session");
+    //console.log("user has a valid session");
     req.headers["X-DA-USER-ID"] = session.userId;
     next();
   } catch (e) {

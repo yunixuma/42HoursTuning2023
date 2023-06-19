@@ -85,7 +85,7 @@ export const createMatchGroup = async (
         continue;
       }
       members = members.concat(candidate);
-      console.log(`${candidate.userId} is added to members`);
+      //console.log(`${candidate.userId} is added to members`);
     }
   }
 
