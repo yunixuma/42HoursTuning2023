@@ -53,7 +53,9 @@ export const getUsersByKeyword = async (
 
 export const getUsersByKeyword2 = async (
   keyword: string,
-  targets: Target[]
+  targets: Target[],
+  offset: number,
+  limit: number
 ): Promise<SearchedUser[]> => {
   //const users: SearchedUser[] = [];
   const querys: string[] = [];
@@ -138,7 +140,8 @@ export const getUsersByKeyword2 = async (
   let query = querys.join(` 
   UNION 
   `);
-  query += ` ORDER BY entry_date ASC, kana ASC `;
+  query += ` ORDER BY entry_date ASC, kana ASC
+  LIMIT ${limit} OFFSET ${offset} `;
 
   console.log("---------------search---------------");
   console.log(query);

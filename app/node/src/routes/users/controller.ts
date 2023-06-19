@@ -167,23 +167,23 @@ usersRouter.get(
     */
       const uniqueUsers = await getUsersByKeyword2(
         keyword,
-        targets as Target[]
+        targets as Target[],
+        offset,
+        limit
       );
 
       // User型に変換
-      const users: User[] = uniqueUsers
-        .slice(offset, offset + limit)
-        .map((user) => {
-          return {
-            userId: user.userId,
-            userName: user.userName,
-            userIcon: {
-              fileId: user.userIcon.fileId,
-              fileName: user.userIcon.fileName,
-            },
-            officeName: user.officeName,
-          };
-        });
+      const users: User[] = uniqueUsers.map((user) => {
+        return {
+          userId: user.userId,
+          userName: user.userName,
+          userIcon: {
+            fileId: user.userIcon.fileId,
+            fileName: user.userIcon.fileName,
+          },
+          officeName: user.officeName,
+        };
+      });
       res.json(users);
       console.log(`successfully searched ${users.length} users`);
     } catch (e) {
