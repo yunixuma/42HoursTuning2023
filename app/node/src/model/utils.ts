@@ -63,6 +63,20 @@ export const convertToMatchGroupDetail = (
   };
 };
 
+export const convertToMatchGroupDetail2 = (
+  rows: RowDataPacket[]
+): MatchGroupDetail[] => {
+  return rows.map((row: RowDataPacket) => ({
+    matchGroupId: row.match_group_id,
+    matchGroupName: row.match_group_name,
+    description: row.description,
+    members: row.members,
+    status: row.status,
+    createdBy: row.created_by,
+    createdAt: convertDateToString(row.created_at),
+  }));
+};
+
 export const convertUsersForFilterToUsers = (
   usersForFilter: UserForFilter[]
 ): User[] => {
@@ -76,7 +90,9 @@ export const convertUsersForFilterToUsers = (
   });
 };
 
-export const convertToUserForFilter2 = (rows: RowDataPacket[]): UserForFilter[] => {
+export const convertToUserForFilter2 = (
+  rows: RowDataPacket[]
+): UserForFilter[] => {
   return rows.map((row: RowDataPacket) => ({
     userId: row.user_id,
     userName: row.user_name,

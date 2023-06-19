@@ -95,7 +95,10 @@ export const getUsersByUserIds = async (
     return [];
   }
   const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT user_id, user_name, kana, entry_date, office_id, user_icon_id, (SELECT office_name FROM office o1 WHERE o1.office_id = u1.office_id) AS office_name, (SELECT file_name FROM file f1 WHERE f1.file_id = u1.user_icon_id) AS file_name FROM user u1 WHERE u1.user_id IN (?)`,
+    `SELECT user_id, user_name, kana, entry_date, office_id, user_icon_id, 
+    (SELECT office_name FROM office o1 WHERE o1.office_id = u1.office_id) AS office_name, 
+    (SELECT file_name FROM file f1 WHERE f1.file_id = u1.user_icon_id) AS file_name 
+    FROM user u1 WHERE u1.user_id IN (?)`,
     [userIds]
   );
 

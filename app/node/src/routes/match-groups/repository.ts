@@ -2,7 +2,11 @@ import { RowDataPacket } from "mysql2";
 import pool from "../../util/mysql";
 import { MatchGroup, MatchGroupDetail, User } from "../../model/types";
 import { getUsersByUserIds } from "../users/repository";
-import { convertToMatchGroupDetail } from "../../model/utils";
+import {
+  convertToSearchedUser,
+  convertToMatchGroupDetail,
+  convertToMatchGroupDetail2,
+} from "../../model/utils";
 
 export const hasSkillNameRecord = async (
   skillName: string
@@ -115,4 +119,56 @@ export const getMatchGroupsByMatchGroupIds = async (
   }
 
   return matchGroups;
+};
+
+export const getMatchGroupsByMatchGroupIds2 = async (
+  userId: string,
+  status: string,
+  offset: number,
+  limit: number
+): Promise<MatchGroup[]> => {
+  let query = `SELECT mg.match_group_id, mg.match_group_name, mg.description, mg.status, mg.created_by, mg.created_at
+    FROM match_group mg
+    LEFT JOIN match_group_member mgm
+    ON mgm.match_group_id = mg.match_group_id
+    WHERE mgm.user_id = ? `;
+  if (status === "open") {
+    query += " AND mg.status = 'open' ";
+  }
+  query +=
+    " ORDER BY mg.status DESC, mg.created_at DESC, mg.match_group_name ASC ";
+  query += ` LIMIT ${limit} OFFSET ${offset} `;
+
+  const [matchGroups] = await pool.query<RowDataPacket[]>(query, [userId]);
+
+  return convertToMatchGroupDetail2(matchGroups);
+};
+
+export const getMatchGroupDetail = async (
+  matchGroups: MatchGroup[]
+): Promise<MatchGroup[]> => {
+  const ret: MatchGroup[] = [];
+  const query = `SELECT u1.user_id, user_name, kana, entry_date, office_id, user_icon_id, 
+  (SELECT office_name FROM office o1 WHERE o1.office_id = u1.office_id) AS office_name, 
+  (SELECT file_name FROM file f1 WHERE f1.file_id = u1.user_icon_id) AS file_name 
+  FROM user u1
+  LEFT JOIN match_group_member mgm
+  ON mgm.user_id = u1.user_id
+  WHERE mgm.match_group_id = ? `;
+
+  for (let i = 0; i < matchGroups.length; i++) {
+    const [rows] = await pool.query<RowDataPacket[]>(query, [
+      matchGroups[i].matchGroupId,
+    ]);
+    const searchedUsers = convertToSearchedUser(rows);
+    // SearchedUserからUser型に変換
+    const members: User[] = searchedUsers.map((searchedUser) => {
+      const { kana: _kana, entryDate: _entryDate, ...rest } = searchedUser;
+      return rest;
+    });
+    matchGroups[i].members = members;
+    ret.push(matchGroups[i]);
+  }
+
+  return ret;
 };

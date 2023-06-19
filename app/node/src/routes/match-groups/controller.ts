@@ -3,8 +3,10 @@ import { MatchGroupConfig } from "../../model/types";
 import { checkSkillsRegistered, createMatchGroup } from "./usecase";
 import { getUserByUserId } from "../users/repository";
 import {
-  getMatchGroupIdsByUserId,
-  getMatchGroupsByMatchGroupIds,
+  //getMatchGroupIdsByUserId,
+  //getMatchGroupsByMatchGroupIds,
+  getMatchGroupsByMatchGroupIds2,
+  getMatchGroupDetail,
 } from "./repository";
 
 export const matchGroupRouter = express.Router();
@@ -240,6 +242,7 @@ matchGroupRouter.get(
         offset = 0;
       }
 
+      /*
       const matchGroupIds = await getMatchGroupIdsByUserId(user.userId);
       console.log(`user participated in ${matchGroupIds.length} match groups`);
       if (matchGroupIds.length === 0) {
@@ -269,6 +272,22 @@ matchGroupRouter.get(
       });
 
       res.json(matchGroups.slice(offset, offset + limit));
+      console.log("successfully found match groups");
+      */
+
+      const matchGroups = await getMatchGroupsByMatchGroupIds2(
+        userId,
+        status,
+        offset,
+        limit
+      );
+      if (matchGroups.length === 0) {
+        res.json([]);
+        console.log("no valid match groups found");
+        return;
+      }
+
+      res.json(await getMatchGroupDetail(matchGroups));
       console.log("successfully found match groups");
     } catch (e) {
       next(e);
