@@ -337,8 +337,9 @@ export const getUserForFilter3 = async (
         ON user.user_id = skm.user_id 
         AND skm.skill_id IN (SELECT skill_id FROM skill WHERE skill_name IN ("${matchGroupConfig.skillFilter[0]}")) `;
   }
-  console.log("---------------");
-  console.log(matchGroupConfig.skillFilter);
+
+  //console.log("---------------");
+  //console.log(matchGroupConfig.skillFilter);
 
   const c1 = "0123456789abcdefghijklmnopqrstuvwxyz"[
     Math.floor(Math.random() * 36)
@@ -349,8 +350,8 @@ export const getUserForFilter3 = async (
   query += ` WHERE user.user_id LIKE "${c1}%"`;
   query += " LIMIT 500 ";
 
-  console.log("------------------------0");
-  console.log(query);
+  //console.log("------------------------0");
+  //console.log(query);
 
   [userRows] = await pool.query<RowDataPacket[]>(query);
 
