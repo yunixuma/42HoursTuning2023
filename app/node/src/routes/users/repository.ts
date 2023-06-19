@@ -33,24 +33,19 @@ export const getUsers = async (
   offset: number
 ): Promise<User[]> => {
   const query = `
-    SELECT
-      user.user_id,
-      user.user_name,
-      user.office_id,
-      user.user_icon_id,
-      office.office_name,
-      file.file_name
-    FROM
-      user
-    LEFT JOIN
-      office ON user.office_id = office.office_id
-    LEFT JOIN
-      file ON user.user_icon_id = file.file_id
-    ORDER BY
-      user.entry_date ASC,
-      user.kana ASC
-    LIMIT ? OFFSET ?
-  `;
+  SELECT
+    user.user_id,
+    user.user_name,
+    user.office_id,
+    user.user_icon_id,
+    (SELECT office_name FROM office WHERE office_id = user.office_id) AS office_name,
+    (SELECT file_name FROM file WHERE file_id = user.user_icon_id) AS file_name
+  FROM
+    user
+  ORDER BY
+    user.entry_date ASC,
+    user.kana ASC
+  LIMIT ? OFFSET ? `;
 
   const [rows] = await pool.query<RowDataPacket[]>(query, [limit, offset]);
 
