@@ -51,6 +51,7 @@ export const getUsersByKeyword = async (
   return users;
 };
 
+/*
 export const getUsersByKeyword2 = async (
   keyword: string,
   targets: Target[],
@@ -148,6 +149,89 @@ export const getUsersByKeyword2 = async (
 
   const keywords = querys.map(() => `%${keyword}%`);
 
+  const [rows] = await pool.query<RowDataPacket[]>(query, keywords);
+
+  return convertToSearchedUser(rows);
+};
+*/
+
+export const getUsersByKeyword2 = async (
+  keyword: string,
+  targets: Target[],
+  offset: number,
+  limit: number
+): Promise<SearchedUser[]> => {
+  //const users: SearchedUser[] = [];
+  const querys: string[] = [];
+  const select = `SELECT DISTINCT user.user_id, user.user_name, user.kana,
+    user.entry_date, user.office_id, user.user_icon_id, 
+    (SELECT office_name FROM office o1 WHERE o1.office_id = user.office_id) AS office_name, 
+    (SELECT file_name FROM file f1 WHERE f1.file_id = user.user_icon_id) AS file_name 
+    FROM user
+    LEFT JOIN department_role_member drm
+    ON drm.user_id = user.user_id
+    AND drm.belong = true
+    LEFT JOIN department dep
+    ON dep.department_id = drm.department_id
+    AND dep.active = true
+    LEFT JOIN role
+    ON role.role_id = drm.role_id
+    AND role.active = true
+    LEFT JOIN office
+    ON office.office_id = user.office_id 
+    LEFT JOIN skill_member sm
+    ON sm.user_id = user.user_id
+    LEFT JOIN skill
+    ON skill.skill_id = sm.skill_id
+    WHERE 1
+    `;
+
+  for (const target of targets) {
+    // const oldLen = users.length;
+    switch (target) {
+      case "userName":
+        // users = users.concat(await getUsersByUserName(keyword));
+        querys.push(` AND user.user_name LIKE ? `);
+        break;
+      case "kana":
+        // users = users.concat(await getUsersByKana(keyword));
+        querys.push(` AND kana LIKE ? `);
+        break;
+      case "mail":
+        // users = users.concat(await getUsersByMail(keyword));
+        querys.push(` AND mail LIKE ? `);
+        break;
+      case "department":
+        // users = users.concat(await getUsersByDepartmentName(keyword));
+        querys.push(` AND dep.department_name LIKE ? `);
+        break;
+      case "role":
+        // users = users.concat(await getUsersByRoleName(keyword));
+        querys.push(` AND role.role_name LIKE ? `);
+        break;
+      case "office":
+        // users = users.concat(await getUsersByOfficeName(keyword));
+        querys.push(` AND office.office_name LIKE ? `);
+        break;
+      case "skill":
+        // users = users.concat(await getUsersBySkillName(keyword));
+        querys.push(` AND skill.skill_name LIKE ? `);
+        break;
+      case "goal":
+        // users = users.concat(await getUsersByGoal(keyword));
+        querys.push(` AND goal LIKE ? `);
+        break;
+    }
+    // console.log(`${users.length - oldLen} users found by ${target}`);
+  }
+
+  let query = select + querys.join("");
+  query += ` ORDER BY entry_date ASC, kana ASC
+  LIMIT ${limit} OFFSET ${offset} `;
+
+  //console.log("---------------search---------------");
+  //console.log(query);
+  const keywords = querys.map(() => `%${keyword}%`);
   const [rows] = await pool.query<RowDataPacket[]>(query, keywords);
 
   return convertToSearchedUser(rows);
