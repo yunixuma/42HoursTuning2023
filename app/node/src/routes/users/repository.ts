@@ -1,8 +1,11 @@
 import { RowDataPacket } from "mysql2";
 import pool from "../../util/mysql";
-import { SearchedUser, User, UserForFilter,
-  MatchGroupConfig 
- } from "../../model/types";
+import {
+  SearchedUser,
+  User,
+  UserForFilter,
+  MatchGroupConfig,
+} from "../../model/types";
 import {
   convertToSearchedUser,
   convertToUserForFilter,
@@ -88,7 +91,7 @@ export const getUserByUserId = async (
 export const getUsersByUserIds = async (
   userIds: string[]
 ): Promise<SearchedUser[]> => {
-  if(userIds.length === 0) {
+  if (userIds.length === 0) {
     return [];
   }
   const [rows] = await pool.query<RowDataPacket[]>(
@@ -234,11 +237,16 @@ export const getUserForFilter = async (
   if (!userId) {
     let randomUserRow;
     do {
-      const [recordCountRow] = await pool.query<RowDataPacket[]>("SELECT COUNT(1) as recordCount FROM user");
+      const [recordCountRow] = await pool.query<RowDataPacket[]>(
+        "SELECT COUNT(1) as recordCount FROM user"
+      );
       const recordCount = recordCountRow[0].recordCount;
       const randomId = Math.floor(Math.random() * recordCount) + 1;
 
-      [randomUserRow] = await pool.query<RowDataPacket[]>("SELECT user_id, user_name, office_id, user_icon_id FROM user WHERE id = ?", [randomId]);
+      [randomUserRow] = await pool.query<RowDataPacket[]>(
+        "SELECT user_id, user_name, office_id, user_icon_id FROM user WHERE id = ?",
+        [randomId]
+      );
     } while (randomUserRow.length === 0);
 
     userRows = randomUserRow;
@@ -274,7 +282,7 @@ export const getUserForFilter = async (
 
   return convertToUserForFilter(user);
 };
-
+/*
 export const getUserForFilter2 = async (
   ): Promise<UserForFilter[]> => {
 
@@ -298,52 +306,64 @@ export const getUserForFilter2 = async (
 
     return convertToUserForFilter2(userRows);
   };
-
+*/
 export const getUserForFilter3 = async (
   matchGroupConfig: MatchGroupConfig,
   owner: UserForFilter
 ): Promise<UserForFilter[]> => {
   let userRows: RowDataPacket[];
 
-  if(matchGroupConfig.departmentFilter !== "onlyMyDepartment" && 
-    matchGroupConfig.officeFilter !== "onlyMyOffice") {
-      return getUserForFilter2();
-  }
-
-  let query = "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
+  let query =
+    "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
   (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, \
   (SELECT file_name FROM file WHERE file.file_id = user.user_icon_id) AS file_name, \
-  (SELECT department_name FROM department WHERE department_id = (SELECT department_id FROM department_role_member drm WHERE drm.user_id = user.user_id AND belong = true)) AS department_name, \
-  (SELECT skill_name FROM skill WHERE skill_id = (SELECT skill_id FROM skill_member sk WHERE sk.user_id = user.user_id LIMIT 1)) AS skill_names \
+  (SELECT department_name FROM department WHERE department_id = (SELECT department_id FROM department_role_member drm WHERE drm.user_id = user.user_id AND belong = true)) AS department_name \
   FROM user ";
 
   // 部署指定がある時
-  if(matchGroupConfig.departmentFilter === "onlyMyDepartment") {
-    query += 
-      ` INNER JOIN department_role_member drm 
+  if (matchGroupConfig.departmentFilter === "onlyMyDepartment") {
+    query += ` INNER JOIN department_role_member drm 
         ON drm.user_id = user.user_id 
         AND department_id = (SELECT department_id FROM department_role_member WHERE user_id = "${owner.userId}" AND belong = true) 
-        AND drm.belong = true `
+        AND drm.belong = true `;
   }
   // オフィス指定がある時
-  if(matchGroupConfig.officeFilter === "onlyMyOffice") {
-    query += 
-      ` INNER JOIN office 
+  if (matchGroupConfig.officeFilter === "onlyMyOffice") {
+    query += ` INNER JOIN office 
         ON user.office_id = office.office_id 
-        AND office.office_id = (SELECT office_id FROM office WHERE office_name = "${owner.officeName}") `
+        AND office.office_id = (SELECT office_id FROM office WHERE office_name = "${owner.officeName}") `;
   }
+  // スキル指定がある時
+  if (matchGroupConfig.skillFilter.length > 0) {
+    query += ` INNER JOIN skill_member skm
+        ON user.user_id = skm.user_id 
+        AND skm.skill_id IN (SELECT skill_id FROM skill WHERE skill_name IN ("${matchGroupConfig.skillFilter[0]}")) `;
+  }
+  console.log("---------------");
+  console.log(matchGroupConfig.skillFilter);
 
-  const c1 = "0123456789abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 36)];
-  const c2 = "0123456789abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 36)];
-  query += ` WHERE user.user_id LIKE "${c1 + c2}%"`
-  query += " LIMIT 100 ";
+  const c1 = "0123456789abcdefghijklmnopqrstuvwxyz"[
+    Math.floor(Math.random() * 36)
+  ];
+  // const c2 = "0123456789abcdefghijklmnopqrstuvwxyz"[
+  //   Math.floor(Math.random() * 36)
+  // ];
+  query += ` WHERE user.user_id LIKE "${c1}%"`;
+  query += " LIMIT 500 ";
 
-  console.log('------------------------0');
+  console.log("------------------------0");
   console.log(query);
 
-  [userRows] = await pool.query<RowDataPacket[]>(
-    query
-  );
+  [userRows] = await pool.query<RowDataPacket[]>(query);
+
+  for (let i = 0; i < userRows.length; i++) {
+    const [skillNameRows] = await pool.query<RowDataPacket[]>(
+      `SELECT skill_name FROM skill WHERE skill_id IN (SELECT skill_id FROM skill_member WHERE user_id = ?)`,
+      [userRows[i].user_id]
+    );
+
+    userRows[i].skill_names = skillNameRows.map((row) => row.skill_name);
+  }
+
   return convertToUserForFilter2(userRows);
 };
-

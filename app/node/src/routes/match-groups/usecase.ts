@@ -39,50 +39,54 @@ export const createMatchGroup = async (
     }
     const candidates = await getUserForFilter3(matchGroupConfig, owner);
 
-    while (members.length < matchGroupConfig.numOfMembers && candidates.length > 0) {
-      let candidate = candidates[candidates.length - 1];
+    while (
+      members.length < matchGroupConfig.numOfMembers &&
+      candidates.length > 0
+    ) {
+      const candidate = candidates[candidates.length - 1];
       candidates.pop();
-    if (
-      matchGroupConfig.departmentFilter !== "none" &&
-      !isPassedDepartmentFilter(
-        matchGroupConfig.departmentFilter,
-        owner.departmentName,
-        candidate.departmentName
-      )
-    ) {
-      console.log(`${candidate.userId} is not passed department filter`);
-      continue;
-    } else if (
-      matchGroupConfig.officeFilter !== "none" &&
-      !isPassedOfficeFilter(
-        matchGroupConfig.officeFilter,
-        owner.officeName,
-        candidate.officeName
-      )
-    ) {
-      console.log(`${candidate.userId} is not passed office filter`);
-      continue;
-    } else if (
-      matchGroupConfig.skillFilter.length > 0 &&
-      !matchGroupConfig.skillFilter.some((skill) =>
-        candidate.skillNames.includes(skill)
-      )
-    ) {
-      console.log(`${candidate.userId} is not passed skill filter`);
-      continue;
-    } else if (
-      matchGroupConfig.neverMatchedFilter &&
-      !(await isPassedMatchFilter(matchGroupConfig.ownerId, candidate.userId))
-    ) {
-      console.log(`${candidate.userId} is not passed never matched filter`);
-      continue;
-    } else if (members.some((member) => member.userId === candidate.userId)) {
-      console.log(`${candidate.userId} is already added to members`);
-      continue;
+
+      if (
+        matchGroupConfig.departmentFilter !== "none" &&
+        !isPassedDepartmentFilter(
+          matchGroupConfig.departmentFilter,
+          owner.departmentName,
+          candidate.departmentName
+        )
+      ) {
+        console.log(`${candidate.userId} is not passed department filter`);
+        continue;
+      } else if (
+        matchGroupConfig.officeFilter !== "none" &&
+        !isPassedOfficeFilter(
+          matchGroupConfig.officeFilter,
+          owner.officeName,
+          candidate.officeName
+        )
+      ) {
+        console.log(`${candidate.userId} is not passed office filter`);
+        continue;
+      } else if (
+        matchGroupConfig.skillFilter.length > 0 &&
+        !matchGroupConfig.skillFilter.some((skill) =>
+          candidate.skillNames.includes(skill)
+        )
+      ) {
+        console.log(`${candidate.userId} is not passed skill filter`);
+        continue;
+      } else if (
+        matchGroupConfig.neverMatchedFilter &&
+        !(await isPassedMatchFilter(matchGroupConfig.ownerId, candidate.userId))
+      ) {
+        console.log(`${candidate.userId} is not passed never matched filter`);
+        continue;
+      } else if (members.some((member) => member.userId === candidate.userId)) {
+        console.log(`${candidate.userId} is already added to members`);
+        continue;
+      }
+      members = members.concat(candidate);
+      console.log(`${candidate.userId} is added to members`);
     }
-    members = members.concat(candidate);
-    console.log(`${candidate.userId} is added to members`);
-  }
   }
 
   const matchGroupId = uuidv4();
