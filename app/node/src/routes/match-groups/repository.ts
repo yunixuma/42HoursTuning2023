@@ -127,7 +127,7 @@ export const getMatchGroupsByMatchGroupIds2 = async (
   offset: number,
   limit: number
 ): Promise<MatchGroup[]> => {
-  let query = `SELECT mg.match_group_id, mg.match_group_name, mg.description, mg.status, mg.created_by, mg.created_at
+  let query = `SELECT mg.match_group_id, mg.match_group_name, mg.status, mg.created_by, mg.created_at
     FROM match_group mg
     LEFT JOIN match_group_member mgm
     ON mgm.match_group_id = mg.match_group_id
