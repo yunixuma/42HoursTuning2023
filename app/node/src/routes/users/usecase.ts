@@ -138,7 +138,7 @@ export const getUsersByKeyword2 = async (
   }
 
   let query = querys.join(` 
-  UNION 
+  UNION ALL
   `);
   query += ` ORDER BY entry_date ASC, kana ASC
   LIMIT ${limit} OFFSET ${offset} `;
