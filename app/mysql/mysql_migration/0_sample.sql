@@ -1,5 +1,7 @@
 ALTER TABLE user ADD INDEX mail_password_idx(mail, password);
 ALTER TABLE user ADD INDEX office_id_idx(office_id);
+ALTER TABLE user ADD INDEX entry_date_kana_idx(entry_date, kana);
+
 ALTER TABLE user ADD COLUMN id INT NOT NULL AUTO_INCREMENT UNIQUE FIRST;
 
 ALTER TABLE session ADD INDEX linked_user_id_idx (linked_user_id);
