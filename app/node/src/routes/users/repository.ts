@@ -310,7 +310,7 @@ export const getUserForFilter3 = async (
   owner: UserForFilter
 ): Promise<UserForFilter[]> => {
   let userRows: RowDataPacket[];
-
+  let filter_count = 0;
   let query =
     "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
   (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, \
@@ -324,18 +324,21 @@ export const getUserForFilter3 = async (
         ON drm.user_id = user.user_id 
         AND department_id = (SELECT department_id FROM department_role_member WHERE user_id = "${owner.userId}" AND belong = true) 
         AND drm.belong = true `;
+    filter_count++;
   }
   // オフィス指定がある時
   if (matchGroupConfig.officeFilter === "onlyMyOffice") {
     query += ` INNER JOIN office 
         ON user.office_id = office.office_id 
         AND office.office_id = (SELECT office_id FROM office WHERE office_name = "${owner.officeName}") `;
+    filter_count++;
   }
   // スキル指定がある時
   if (matchGroupConfig.skillFilter.length > 0) {
     query += ` INNER JOIN skill_member skm
         ON user.user_id = skm.user_id 
         AND skm.skill_id IN (SELECT skill_id FROM skill WHERE skill_name IN ("${matchGroupConfig.skillFilter[0]}")) `;
+    filter_count++;
   }
 
   //console.log("---------------");
@@ -347,8 +350,12 @@ export const getUserForFilter3 = async (
   // const c2 = "0123456789abcdefghijklmnopqrstuvwxyz"[
   //   Math.floor(Math.random() * 36)
   // ];
-  query += ` WHERE user.user_id LIKE "${c1}%"`;
-  query += " LIMIT 500 ";
+  if (filter_count > 0) {
+    query += " LIMIT 500 ";
+  } else {
+    query += ` WHERE user.user_id LIKE "${c1}%"`;
+    query += " LIMIT 500 ";
+  }
 
   //console.log("------------------------0");
   //console.log(query);
