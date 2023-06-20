@@ -25,12 +25,12 @@ usersRouter.get(
   ) => {
     const userIconId: string = req.params.userIconId;
 
-    let data: string | undefined;
-    let fileName: string | undefined;
+    let data: string;
+    let fileName: string;
 
     if (data_cache.has(userIconId)) {
-      data = data_cache.get(userIconId);
-      fileName = file_cache.get(userIconId);
+      data = data_cache.get(userIconId) || "dummy";
+      fileName = file_cache.get(userIconId) || "dummy";
       res.status(200).json({
         fileName: fileName,
         data: data,
@@ -49,10 +49,25 @@ usersRouter.get(
         return;
       }
       const path = userIcon.path;
+
+      if (data_cache.has(path)) {
+        data = data_cache.get(path) || "dummy";
+        fileName = file_cache.get(path) || "dummy";
+        data_cache.set(userIconId, data);
+        file_cache.set(userIconId, fileName);
+        res.status(200).json({
+          fileName: fileName,
+          data: data,
+        });
+        return;
+      }
+
       data = fs.readFileSync(path).toString("base64");
       fileName = userIcon.fileName;
       data_cache.set(userIconId, data);
       file_cache.set(userIconId, fileName);
+      data_cache.set(path, data);
+      file_cache.set(path, fileName);
 
       res.status(200).json({
         fileName: fileName,
