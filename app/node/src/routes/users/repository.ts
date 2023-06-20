@@ -335,9 +335,13 @@ export const getUserForFilter3 = async (
   }
   // スキル指定がある時
   if (matchGroupConfig.skillFilter.length > 0) {
+    let skills = matchGroupConfig.skillFilter.join('", "');
+    skills = '"' + skills + '"';
     query += ` INNER JOIN skill_member skm
         ON user.user_id = skm.user_id 
-        AND skm.skill_id IN (SELECT skill_id FROM skill WHERE skill_name IN ("${matchGroupConfig.skillFilter[0]}")) `;
+        INNER JOIN skill
+        ON skill.skill_id = skm.skill_id
+        AND skill.skill_name IN (${skills}) `;
     filter_count++;
   }
 
@@ -351,10 +355,10 @@ export const getUserForFilter3 = async (
   //   Math.floor(Math.random() * 36)
   // ];
   if (filter_count > 0) {
-    query += " LIMIT 500 ";
+    query += " LIMIT 200 ";
   } else {
     query += ` WHERE user.user_id LIKE "${c1}%"`;
-    query += " LIMIT 500 ";
+    query += " LIMIT 200 ";
   }
 
   //console.log("------------------------0");
