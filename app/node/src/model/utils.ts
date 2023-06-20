@@ -35,6 +35,18 @@ export const convertToSearchedUser = (
   }));
 };
 
+export const convertToUser = (rows: RowDataPacket[]): User[] => {
+  return rows.map((row: RowDataPacket) => ({
+    userId: row.user_id,
+    userName: row.user_name,
+    userIcon: {
+      fileId: row.user_icon_id,
+      fileName: row.file_name,
+    },
+    officeName: row.office_name,
+  }));
+};
+
 export const convertToUserForFilter = (row: RowDataPacket): UserForFilter => {
   return {
     userId: row.user_id,

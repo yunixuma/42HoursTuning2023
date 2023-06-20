@@ -3,7 +3,7 @@ import pool from "../../util/mysql";
 import { MatchGroup, MatchGroupDetail, User } from "../../model/types";
 import { getUsersByUserIds } from "../users/repository";
 import {
-  convertToSearchedUser,
+  convertToUser,
   convertToMatchGroupDetail,
   convertToMatchGroupDetail2,
 } from "../../model/utils";
@@ -148,7 +148,7 @@ export const getMatchGroupDetail = async (
   matchGroups: MatchGroup[]
 ): Promise<MatchGroup[]> => {
   const ret: MatchGroup[] = [];
-  const query = `SELECT u1.user_id, user_name, kana, entry_date, office_id, user_icon_id, 
+  const query = `SELECT u1.user_id, u1.user_name, u1.office_id, u1.user_icon_id, 
   (SELECT office_name FROM office o1 WHERE o1.office_id = u1.office_id) AS office_name, 
   (SELECT file_name FROM file f1 WHERE f1.file_id = u1.user_icon_id) AS file_name 
   FROM user u1
@@ -160,13 +160,7 @@ export const getMatchGroupDetail = async (
     const [rows] = await pool.query<RowDataPacket[]>(query, [
       matchGroups[i].matchGroupId,
     ]);
-    const searchedUsers = convertToSearchedUser(rows);
-    // SearchedUserからUser型に変換
-    const members: User[] = searchedUsers.map((searchedUser) => {
-      const { kana: _kana, entryDate: _entryDate, ...rest } = searchedUser;
-      return rest;
-    });
-    matchGroups[i].members = members;
+    matchGroups[i].members = convertToUser(rows);
     ret.push(matchGroups[i]);
   }
 
