@@ -12,6 +12,9 @@ import fs from "fs";
 
 export const usersRouter = express.Router();
 
+export const data_cache = new Map<string, string>();
+export const file_cache = new Map<string, string>();
+
 // ユーザーアイコン画像取得API
 usersRouter.get(
   "/user-icon/:userIconId",
@@ -21,6 +24,19 @@ usersRouter.get(
     next: express.NextFunction
   ) => {
     const userIconId: string = req.params.userIconId;
+
+    let data: string | undefined;
+    let fileName: string | undefined;
+
+    if (data_cache.has(userIconId)) {
+      data = data_cache.get(userIconId);
+      fileName = file_cache.get(userIconId);
+      res.status(200).json({
+        fileName: fileName,
+        data: data,
+      });
+      return;
+    }
 
     try {
       const userIcon = await getFileByFileId(userIconId);
@@ -33,10 +49,14 @@ usersRouter.get(
         return;
       }
       const path = userIcon.path;
-      const data = fs.readFileSync(path);
+      data = fs.readFileSync(path).toString("base64");
+      fileName = userIcon.fileName;
+      data_cache.set(userIconId, data);
+      file_cache.set(userIconId, fileName);
+
       res.status(200).json({
-        fileName: userIcon.fileName,
-        data: data.toString("base64"),
+        fileName: fileName,
+        data: data,
       });
       console.log("successfully get user icon");
     } catch (e) {
