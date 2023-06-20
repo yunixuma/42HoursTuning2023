@@ -228,6 +228,7 @@ export const getUsersByGoal = async (goal: string): Promise<SearchedUser[]> => {
   return getUsersByUserIds(userIds);
 };
 
+/*
 export const getUserForFilter = async (
   userId?: string
 ): Promise<UserForFilter> => {
@@ -280,6 +281,34 @@ export const getUserForFilter = async (
 
   return convertToUserForFilter(user);
 };
+*/
+
+export const getUserForFilter = async (
+  userId: string
+): Promise<UserForFilter> => {
+  const query = `SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, 
+  (SELECT office_name FROM office WHERE office.office_id = user.office_id) AS office_name, 
+  (SELECT file_name FROM file WHERE file.file_id = user.user_icon_id) AS file_name, 
+  (SELECT department_name FROM department WHERE department_id = (SELECT department_id FROM department_role_member drm WHERE drm.user_id = user.user_id AND belong = true)) AS department_name 
+  FROM user WHERE user_id = ? `;
+  const [userRows] = await pool.query<RowDataPacket[]>(query, [userId]);
+
+  const user = userRows[0];
+
+  const [skillNameRows] = await pool.query<RowDataPacket[]>(
+    `SELECT skill_name FROM skill WHERE skill_id IN (SELECT skill_id FROM skill_member WHERE user_id = ?)`,
+    // `SELECT skill_name
+    // FROM skill
+    // LEFT JOIN skill_member sm
+    // ON sm.skill_id = skill.skill_id
+    // WHERE user_id = ? `,
+    [user.user_id]
+  );
+
+  user.skill_names = skillNameRows.map((row) => row.skill_name);
+
+  return convertToUserForFilter(user);
+};
 /*
 export const getUserForFilter2 = async (
   ): Promise<UserForFilter[]> => {
@@ -309,7 +338,6 @@ export const getUserForFilter3 = async (
   matchGroupConfig: MatchGroupConfig,
   owner: UserForFilter
 ): Promise<UserForFilter[]> => {
-  let userRows: RowDataPacket[];
   let filter_count = 0;
   let query =
     "SELECT user.user_id, user.user_name, user.office_id, user.user_icon_id, \
@@ -355,20 +383,25 @@ export const getUserForFilter3 = async (
   //   Math.floor(Math.random() * 36)
   // ];
   if (filter_count > 0) {
-    query += " LIMIT 200 ";
+    query += " LIMIT 100 ";
   } else {
     query += ` WHERE user.user_id LIKE "${c1}%"`;
-    query += " LIMIT 200 ";
+    query += " LIMIT 100 ";
   }
 
   //console.log("------------------------0");
   //console.log(query);
 
-  [userRows] = await pool.query<RowDataPacket[]>(query);
+  const [userRows] = await pool.query<RowDataPacket[]>(query);
 
   for (let i = 0; i < userRows.length; i++) {
     const [skillNameRows] = await pool.query<RowDataPacket[]>(
       `SELECT skill_name FROM skill WHERE skill_id IN (SELECT skill_id FROM skill_member WHERE user_id = ?)`,
+      // `SELECT skill_name
+      // FROM skill
+      // LEFT JOIN skill_member sm
+      // ON sm.skill_id = skill.skill_id
+      // WHERE user_id = ? `,
       [userRows[i].user_id]
     );
 
