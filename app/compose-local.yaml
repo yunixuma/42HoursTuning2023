@@ -4,6 +4,8 @@ services:
     image: nginx:1.24
     volumes:
       - ./nginx/default-local.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./log/nginx:/var/log/nginx
     ports:
       - 80:80
   backend:
@@ -15,6 +17,7 @@ services:
     volumes:
       - ../images/user-icon:/node/images/user-icon
       - ./node/src:/node/src
+      - ./log/backend:/var
   frontend:
     container_name: frontend
     build:
@@ -37,3 +40,4 @@ services:
       - ../volume/mysql:/var/lib/mysql
       - ./mysql/mysql_migration:/etc/mysql/mysql_migration
       - ./mysql/mysql.conf:/etc/mysql/conf.d/mysql.cnf
+      - ./log/mysql:/var/log/mysql
